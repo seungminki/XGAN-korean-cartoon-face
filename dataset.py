@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.layers.experimental.preprocessing import CenterCrop
+from tensorflow.keras.layers import CenterCrop
 import numpy as np
 
 class Dataset():

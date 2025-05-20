@@ -5,6 +5,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from datetime import datetime
 from random import randrange
+import time
 import os
 
 # ------------------------------------------------
@@ -32,6 +33,8 @@ os.mkdir(str(os.getcwd()) + '/' + results_folder_name + '/checkpoints')
 # ------------------------------------------------
 # -------------------DATASET----------------------
 # ------------------------------------------------
+
+start = time.time()
 
 dataset_obj = Dataset(CARTOON_DATASET_PATH, REAL_DATASET_PATH, batch_size)
 dataset = dataset_obj.dataset_numpy
@@ -71,9 +74,12 @@ checkpoint_path = f"{results_folder_name}/checkpoints/"
 checkpoint_dir = os.path.dirname(checkpoint_path)
 
 # Create a callback that saves the model's weights
-cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_dir + "/" +"epoch_{epoch:03d}.weights.h5",
+                                                 monitor='val_loss', # defalut
                                                  save_weights_only=True,
-                                                 verbose=1)
+                                                 verbose=1,
+                                                 mode='auto', # defalut
+                                                 save_freq=50)
 
 # ------------------------------------------------
 # --------------------TRAIN-----------------------
@@ -86,4 +92,9 @@ xgan.compile(
     loss=tf.keras.losses.BinaryCrossentropy(from_logits=True)
 )
 
-xgan.fit(dataset, epochs=num_epochs, callbacks=[DisplayImages()])
+xgan.build([(None, 64, 64, 3), (None, 64, 64, 3)])
+
+xgan.fit(dataset, epochs=num_epochs, callbacks=[DisplayImages(), cp_callback])
+
+end = time.time()
+print(f"total_time: {end-start:.3f}")

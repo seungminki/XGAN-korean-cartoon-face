@@ -229,7 +229,7 @@ class Generator(layers.Layer):
     self.decoder = Decoder()
 
   def call(self, image, is_cartoon):
-    embedding = self.encoder(image, is_cartoon)
+    embedding = self.encoder(image, is_cartoon=is_cartoon)
     image_a , image_b = self.decoder(embedding)
     return {'image_a': image_a, 'image_b': image_b, 'embedding':embedding}
 
@@ -342,8 +342,10 @@ class XGAN(tf.keras.Model):
       From the cartoon dataset, we pass it through the autoencoder. The caroon images created are compared with the images from the cartoon dataset.
       The same procedure is done with the real face image dataset.
     """
-    loss_autoncoder_cartoon = tf.losses.mean_squared_error(cartoon_dataset, cartoon_from_cartoon_dataset)
-    loss_autoncoder_real = tf.losses.mean_squared_error(real_dataset, real_from_real_dataset)
+    # loss_autoncoder_cartoon = tf.losses.mean_squared_error(cartoon_dataset, cartoon_from_cartoon_dataset)
+    loss_autoncoder_cartoon = tf.keras.losses.MeanSquaredError()(cartoon_dataset, cartoon_from_cartoon_dataset)
+    # loss_autoncoder_real = tf.losses.mean_squared_error(real_dataset, real_from_real_dataset)
+    loss_autoncoder_real = tf.keras.losses.MeanSquaredError()(real_dataset, real_from_real_dataset)
     return loss_autoncoder_cartoon + loss_autoncoder_real
 
   def semantic_consistency_feedback_loss(self, generator_result_from_cartoon, generator_result_from_real):
